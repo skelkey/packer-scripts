@@ -1,0 +1,55 @@
+{
+  "builders": [{
+    "name": "Europe - Outscale",
+    "type": "osc-bsusurrogate",
+    "region": "eu-west-2",
+    #FIXME: https://github.com/hashicorp/packer/issues/10052
+    "access_key": "{{user `access_key`}}",
+    "secret_key": "{{user `secret_key`}}",
+
+    "ssh_username": "outscale",
+    "ssh_interface": "public_ip",
+    "omi_name": "Fedora Cloud 32 - {{isotime \"02-01-2006\"}}",
+
+    "vm_type": "t2.large",
+    "subregion_name": "eu-west-2a",
+    "launch_block_device_mappings": [{
+        "volume_type": "standard",
+        "device_name": "/dev/xvdf",
+        "delete_on_vm_deletion": true,
+        "volume_size": 10
+    }],
+    "omi_root_device": {
+                "delete_on_vm_deletion": true,
+                "source_device_name": "/dev/xvdf",
+                "device_name": "/dev/sda1",
+                "volume_size": 10,
+                "volume_type": "standard"
+    },
+    "omi_virtualization_type": "hvm",
+    "run_tags": {
+      "Name": "Packer Builder - Fedora Cloud 32"
+    },
+    "source_omi_filter": {
+        "filters": {
+            "image-name": "CentOS-7*"
+        },
+        #FIXME: https://github.com/hashicorp/packer/issues/10053
+        "owners": ["188187048142"],
+        "most_recent": "true"
+    }
+  }],
+  "provisioners": [{
+    "type": "shell",
+    "inline": [
+      "sudo yum install -y wget policycoreutils-python-utils",
+      "wget https://download.fedoraproject.org/pub/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.raw.xz",
+      "sudo sh -c 'xz -d < Fedora-Cloud-Base-32-1.6.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
+      "sudo mount -o offset=1048576 /dev/xvdf /mnt",
+      "sudo ln -s /lib/systemd/system/cloud-init.service /mnt/etc/systemd/system/multi-user.target.wants/cloud-init.service",
+      "sudo touch /mnt/.autorelabel",
+      "sudo umount /mnt",
+      "sudo sync"
+    ]
+  }]
+}
