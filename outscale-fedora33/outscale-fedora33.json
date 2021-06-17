@@ -37,19 +37,23 @@
         "most_recent": "true"
     }
   }],
-  "provisioners": [{
-    "type": "shell",
-    "inline": [
-      "sudo yum install -y wget policycoreutils-python-utils",
-      "wget https://download.fedoraproject.org/pub/fedora/linux/releases/33/Cloud/x86_64/images/Fedora-Cloud-Base-33-1.2.x86_64.raw.xz",
-      "sudo sh -c 'xz -d < Fedora-Cloud-Base-33-1.2.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
-      "sudo mount -o offset=1048576 /dev/xvdf /mnt",
-      "sudo ln -s /lib/systemd/system/cloud-init.service /mnt/etc/systemd/system/multi-user.target.wants/cloud-init.service",
-      "sudo ln -s /lib/systemd/system/cloud-config.service /mnt/etc/systemd/system/multi-user.target.wants/cloud-config.service",
-      "sudo ln -s /lib/systemd/system/cloud-final.service /mnt/etc/systemd/system/multi-user.target.wants/cloud-final.service",
-      "sudo touch /mnt/.autorelabel",
-      "sudo umount /mnt",
-      "sudo sync"
-    ]
-  }]
+  "provisioners": [
+	  {
+		  "type": "file",
+		  "source": "outscale-fedora33/99_metadata.cfg",
+		  "destination": "/tmp/99_metadata.cfg"
+	  },
+	  {
+		  "type": "shell",
+		  "inline": [
+			  "sudo yum install -y wget",
+			  "wget https://download.fedoraproject.org/pub/fedora/linux/releases/33/Cloud/x86_64/images/Fedora-Cloud-Base-33-1.2.x86_64.raw.xz",
+			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-33-1.2.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
+			  "sudo mount -o offset=1048576 /dev/xvdf /mnt",
+			  "sudo cp /tmp/99_metadata.cfg /mnt/etc/cloud/cloud.cfg.d/99_metadata.cfg",
+			  "sudo umount /mnt",
+			  "sudo sync"
+		  ]
+	  }
+  ]
 }

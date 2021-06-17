@@ -8,7 +8,7 @@
 
     "ssh_username": "outscale",
     "ssh_interface": "public_ip",
-    "omi_name": "Fedora Cloud 32 - {{isotime \"02-01-2006\"}}",
+    "omi_name": "Fedora Cloud 34 - {{isotime \"02-01-2006\"}}",
 
     "vm_type": "t2.large",
     "subregion_name": "eu-west-2a",
@@ -27,7 +27,7 @@
     },
     "omi_virtualization_type": "hvm",
     "run_tags": {
-      "Name": "Packer Builder - Fedora Cloud 32"
+      "Name": "Packer Builder - Fedora Cloud 34"
     },
     "source_omi_filter": {
         "filters": {
@@ -40,16 +40,16 @@
   "provisioners": [
 	  {
 		  "type": "file",
-		  "source": "outscale-fedora32/99_metadata.cfg",
+		  "source": "outscale-fedora34/99_metadata.cfg",
 		  "destination": "/tmp/99_metadata.cfg"
 	  },
 	  {
 		  "type": "shell",
 		  "inline": [
 			  "sudo yum install -y wget",
-			  "wget https://download.fedoraproject.org/pub/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.raw.xz",
-			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-32-1.6.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
-			  "sudo mount -o offset=1048576 /dev/xvdf /mnt",
+			  "wget https://download.fedoraproject.org/pub/fedora/linux/releases/34/Cloud/x86_64/images/Fedora-Cloud-Base-34-1.2.x86_64.raw.xz",
+			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-34-1.2.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
+			  "sudo mount /dev/xvdf /mnt",
 			  "sudo cp /tmp/99_metadata.cfg /mnt/etc/cloud/cloud.cfg.d/99_metadata.cfg",
 			  "sudo umount /mnt",
 			  "sudo sync"
