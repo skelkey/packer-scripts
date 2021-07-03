@@ -1,0 +1,76 @@
+{
+  "builders": [{
+    "name": "Europe - Outscale",
+    "type": "osc-bsusurrogate",
+    "region": "eu-west-2",
+    "access_key": "{{user `access_key`}}",
+    "secret_key": "{{user `secret_key`}}",
+
+    "ssh_username": "outscale",
+    "ssh_interface": "public_ip",
+    "omi_name": "Arch Linux - {{isotime \"02-01-2006\"}}",
+
+    "vm_type": "t2.large",
+    "subregion_name": "eu-west-2a",
+    "launch_block_device_mappings": [{
+        "volume_type": "standard",
+        "device_name": "/dev/xvdf",
+        "delete_on_vm_deletion": true,
+        "volume_size": 10
+    }],
+    "omi_root_device": {
+                "delete_on_vm_deletion": true,
+                "source_device_name": "/dev/xvdf",
+                "device_name": "/dev/sda1",
+                "volume_size": 10,
+                "volume_type": "standard"
+    },
+    "omi_virtualization_type": "hvm",
+    "run_tags": {
+      "Name": "Packer Builder - Arch Linux"
+    },
+    "source_omi_filter": {
+        "filters": {
+            "image-name": "Ubuntu-20*"
+        },
+        "owners": ["188187048142"],
+        "most_recent": "true"
+    }
+  }],
+  "provisioners": [
+	  {
+		  "type": "file",
+		  "source": "outscale-archlinux/99_metadata.cfg",
+		  "destination": "/tmp/99_metadata.cfg"
+	  },
+	  {
+		  "type": "file",
+		  "source": "outscale-archlinux/grub",
+		  "destination": "/tmp/grub"
+	  },
+	  {
+		  "type": "shell",
+		  "inline": [
+			  "sudo apt update -y",
+			  "sudo apt install -y qemu-utils",
+			  "wget https://mirror.pkgbuild.com/images/v20210619.26314/Arch-Linux-x86_64-cloudimg-20210619.26314.qcow2",
+			  "sudo qemu-img convert -f qcow2 -O raw Arch-Linux-x86_64-cloudimg-20210619.26314.qcow2 /dev/xvdf",
+			  "sudo mkdir /mnt/archlinux",
+			  "sudo mount -o offset=2097152 /dev/xvdf /mnt/archlinux",
+			  "sudo mount --types proc /proc /mnt/archlinux/proc",
+			  "sudo mount --rbind /sys /mnt/archlinux/sys",
+			  "sudo mount --make-rslave /mnt/archlinux/sys",
+			  "sudo mount --rbind /dev /mnt/archlinux/dev",
+			  "sudo mount --make-rslave /mnt/archlinux/dev",
+			  "test -L /dev/shm && sudo rm /dev/shm && sudo mkdir /dev/shm",
+			  "sudo mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm",
+			  "sudo chmod 1777 /dev/shm",
+			  "sudo cp /tmp/99_metadata.cfg /mnt/archlinux/etc/cloud/cloud.cfg.d/99_metadata.cfg",
+			  "sudo cp /tmp/grub /mnt/archlinux/etc/default/grub",
+			  "sudo chroot /mnt/archlinux grub-mkconfig -o /boot/grub/grub.cfg",
+			  "sudo umount -R /mnt/archlinux",
+			  "sudo sync"
+		  ]
+	  }
+  ]
+}
