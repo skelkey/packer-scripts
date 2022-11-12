@@ -8,7 +8,7 @@
 
     "ssh_username": "outscale",
     "ssh_interface": "public_ip",
-    "omi_name": "Fedora Cloud 32 - {{isotime \"02-01-2006\"}}",
+    "omi_name": "Fedora Cloud 36 - {{isotime \"02-01-2006\"}}",
 
     "vm_type": "t2.large",
     "subregion_name": "eu-west-2a",
@@ -27,11 +27,11 @@
     },
     "omi_virtualization_type": "hvm",
     "run_tags": {
-      "Name": "Packer Builder - Fedora Cloud 32"
+      "Name": "Packer Builder - Fedora Cloud 36"
     },
     "source_omi_filter": {
         "filters": {
-            "image-name": "CentOS-7*"
+            "image-name": "Debian-11*"
         },
         "owners": ["188187048142"],
         "most_recent": "true"
@@ -40,17 +40,17 @@
   "provisioners": [
 	  {
 		  "type": "file",
-		  "source": "outscale-fedora32/99_metadata.cfg",
+		  "source": "outscale-fedora36/99_metadata.cfg",
 		  "destination": "/tmp/99_metadata.cfg"
 	  },
 	  {
 		  "type": "shell",
 		  "inline": [
-			  "sudo yum install -y wget",
-			  "wget https://oos.eu-west-2.outscale.com/cloudimages/Fedora-Cloud-Base-32-1.6.x86_64.raw.xz",
-			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-32-1.6.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
-			  "sudo mount -o offset=1048576 /dev/xvdf /mnt",
-			  "sudo cp /tmp/99_metadata.cfg /mnt/etc/cloud/cloud.cfg.d/99_metadata.cfg",
+			  "sudo DEBIAN_FRONTEND=noninteractive apt install -y wget btrfs-progs",
+			  "wget https://oos.eu-west-2.outscale.com/cloudimages/Fedora-Cloud-Base-36-1.5.x86_64.raw.xz",
+			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-36-1.5.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
+			  "sudo mount -o offset=1159725056 /dev/xvdf /mnt",
+			  "sudo cp /tmp/99_metadata.cfg /mnt/root/etc/cloud/cloud.cfg.d/99_metadata.cfg",
 			  "sudo umount /mnt",
 			  "sudo sync"
 		  ]

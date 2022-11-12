@@ -47,7 +47,7 @@
 		  "type": "shell",
 		  "inline": [
 			  "sudo yum install -y wget",
-			  "wget https://download.fedoraproject.org/pub/fedora/linux/releases/34/Cloud/x86_64/images/Fedora-Cloud-Base-34-1.2.x86_64.raw.xz",
+			  "wget https://oos.eu-west-2.outscale.com/cloudimages/Fedora-Cloud-Base-34-1.2.x86_64.raw.xz",
 			  "sudo sh -c 'xz -d < Fedora-Cloud-Base-34-1.2.x86_64.raw.xz - | dd bs=8M status=progress of=/dev/xvdf'",
 			  "sudo mount -o offset=1048576 /dev/xvdf /mnt",
 			  "sudo cp /tmp/99_metadata.cfg /mnt/etc/cloud/cloud.cfg.d/99_metadata.cfg",

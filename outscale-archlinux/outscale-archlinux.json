@@ -53,7 +53,7 @@
 		  "inline": [
 			  "sudo apt update -y",
 			  "sudo apt install -y qemu-utils",
-			  "wget https://mirror.pkgbuild.com/images/v20210619.26314/Arch-Linux-x86_64-cloudimg-20210619.26314.qcow2",
+			  "wget https://oos.eu-west-2.outscale.com/cloudimages/Arch-Linux-x86_64-cloudimg-20210619.26314.qcow2",
 			  "sudo qemu-img convert -f qcow2 -O raw Arch-Linux-x86_64-cloudimg-20210619.26314.qcow2 /dev/xvdf",
 			  "sudo mkdir /mnt/archlinux",
 			  "sudo mount -o offset=2097152 /dev/xvdf /mnt/archlinux",
