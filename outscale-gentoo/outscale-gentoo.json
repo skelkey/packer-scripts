@@ -40,57 +40,57 @@
   "provisioners": [
 	  {
 		  "type": "file",
-		  "source": "gentoo/make.conf",
+		  "source": "outscale-gentoo/make.conf",
 		  "destination": "/tmp/make.conf"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/locale.gen",
+		  "source": "outscale-gentoo/locale.gen",
 		  "destination": "/tmp/locale.gen"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/locale.conf",
+		  "source": "outscale-gentoo/locale.conf",
 		  "destination": "/tmp/locale.conf"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/02locale",
+		  "source": "outscale-gentoo/02locale",
 		  "destination": "/tmp/02locale"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/networkmanager",
+		  "source": "outscale-gentoo/networkmanager",
 		  "destination": "/tmp/networkmanager"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/package.license",
+		  "source": "outscale-gentoo/package.license",
 		  "destination": "/tmp/package.license"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/fstab",
+		  "source": "outscale-gentoo/fstab",
 		  "destination": "/tmp/fstab"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/cloud-init",
+		  "source": "outscale-gentoo/cloud-init",
 		  "destination": "/tmp/cloud-init"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/99_metadata.cfg",
+		  "source": "outscale-gentoo/99_metadata.cfg",
 		  "destination": "/tmp/99_metadata.cfg"
 	  },
 	  {
 		  "type" : "file",
-		  "source": "gentoo/20_user.cfg",
+		  "source": "outscale-gentoo/20_user.cfg",
 		  "destination": "/tmp/20_user.cfg"
 	  },
 	  {
 		  "type": "file",
-		  "source": "gentoo/grub",
+		  "source": "outscale-gentoo/grub",
 		  "destination": "/tmp/grub"
 	  },
 	  {
@@ -101,7 +101,7 @@
 			  "wget https://gentoo.osuosl.org/releases/amd64/autobuilds/$(tail -n1 latest-stage3-amd64-systemd.txt | cut -d' ' -f1)",
 		  	  "sudo mkfs.ext4 -F /dev/xvdf",
 			  "sudo e2label /dev/xvdf gentoo-rootfs",
-		  	  "sudo mkdir /mnt/gentoo",
+		  	  "sudo mkdir -p /mnt/gentoo",
 		  	  "sudo mount /dev/xvdf /mnt/gentoo",
 		  	  "sudo tar -xJf $(tail -n1 latest-stage3-amd64-systemd.txt | cut -d' ' -f1 | cut -d'/' -f2) --xattrs-include='*.*' --numeric-owner --directory /mnt/gentoo",
 		  	  "sudo cp --dereference /etc/resolv.conf /mnt/gentoo/etc/",
@@ -110,7 +110,7 @@
 		  	  "sudo mount --make-rslave /mnt/gentoo/sys",
 		  	  "sudo mount --rbind /dev /mnt/gentoo/dev",
 		  	  "sudo mount --make-rslave /mnt/gentoo/dev",
-		  	  "test -L /dev/shm && sudo rm /dev/shm && sudo mkdir /dev/shm",
+		  	  "test -L /dev/shm && sudo rm /dev/shm && sudo mkdir -p /dev/shm",
 		  	  "sudo mount --types tmpfs --options nosuid,nodev,noexec shm /dev/shm",
 		  	  "sudo chmod 1777 /dev/shm",
 		  	  "sudo chroot /mnt/gentoo emerge --sync",
@@ -132,7 +132,7 @@
 			  "sudo cp /tmp/package.license /mnt/gentoo/etc/portage/package.license",
 			  "sudo chroot /mnt/gentoo emerge sys-kernel/linux-firmware",
 			  "sudo cp /tmp/fstab /mnt/gentoo/etc/fstab",
-			  "sudo mkdir /mnt/gentoo/etc/portage/package.accept_keywords",
+			  "sudo mkdir -p /mnt/gentoo/etc/portage/package.accept_keywords",
 			  "sudo cp /tmp/cloud-init /mnt/gentoo/etc/portage/package.accept_keywords/cloud-init",
 		  	  "sudo chroot /mnt/gentoo emerge cloud-init",
 			  "sudo cp /tmp/99_metadata.cfg /mnt/gentoo/etc/cloud/cloud.cfg.d",
@@ -144,7 +144,7 @@
 			  "sudo chroot /mnt/gentoo emerge sudo",
 			  "sudo chroot /mnt/gentoo emerge sys-boot/grub:2",
 			  "sudo cp /tmp/grub /mnt/gentoo/etc/default/grub",
-			  "sudo mkdir /mnt/gentoo/boot/grub",
+			  "sudo mkdir -p /mnt/gentoo/boot/grub",
 			  "sudo chroot /mnt/gentoo grub-mkconfig -o /boot/grub/grub.cfg",
 			  "sudo chroot /mnt/gentoo grub-install --force /dev/xvdf",
 			  "sudo umount -l /mnt/gentoo/dev{/shm,/pts,}",
