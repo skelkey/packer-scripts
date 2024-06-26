@@ -1,1 +1,1 @@
-net-misc/networkmanager -wifi -modemmanager -wext
+net-misc/networkmanager -wifi -modemmanager -wext dhclient

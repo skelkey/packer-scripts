@@ -1,17 +1,17 @@
 {
   "builders": [{
-    "name": "Europe - Outscale",
+    "name": "{{ user `region` }} - Outscale",
     "type": "osc-bsusurrogate",
-    "region": "eu-west-2",
-    "access_key": "{{user `access_key`}}",
-    "secret_key": "{{user `secret_key`}}",
+    "region": "{{ user `region` }}",
+    "access_key": "{{ user `access_key` }}",
+    "secret_key": "{{ user `secret_key` }}",
 
     "ssh_username": "outscale",
     "ssh_interface": "public_ip",
     "omi_name": "Gentoo - {{isotime \"02-01-2006\"}}",
 
-    "vm_type": "t2.large",
-    "subregion_name": "eu-west-2a",
+    "vm_type": "{{ user `vm_type` }}",
+    "subregion_name": "{{ user `region` }}a",
     "launch_block_device_mappings": [{
         "volume_type": "standard",
         "device_name": "/dev/xvdf",
@@ -33,7 +33,7 @@
         "filters": {
 		"image-name": "CentOS-7*"
         },
-        "owners": ["188187048142"],
+        "owners": ["{{ user `owner_id` }}"],
         "most_recent": "true"
     }
   }],
@@ -79,11 +79,6 @@
 		  "destination": "/tmp/cloud-init"
 	  },
 	  {
-		  "type": "file",
-		  "source": "outscale-gentoo/99_metadata.cfg",
-		  "destination": "/tmp/99_metadata.cfg"
-	  },
-	  {
 		  "type" : "file",
 		  "source": "outscale-gentoo/20_user.cfg",
 		  "destination": "/tmp/20_user.cfg"
@@ -96,14 +91,14 @@
 	  {
 		  "type": "shell",
 		  "inline": [
-			  "sudo yum install -y wget",
-			  "wget https://gentoo.osuosl.org/releases/amd64/autobuilds/latest-stage3-amd64-systemd.txt",
-			  "wget https://gentoo.osuosl.org/releases/amd64/autobuilds/$(tail -n1 latest-stage3-amd64-systemd.txt | cut -d' ' -f1)",
+			  "sudo yum install -y wget gpg",
+			  "wget https://gentoo.osuosl.org/releases/amd64/autobuilds/latest-stage3-amd64-openrc.txt",
+			  "wget https://gentoo.osuosl.org/releases/amd64/autobuilds/$(gpg -d latest-stage3-amd64-openrc.txt 2> /dev/null | tail -1 | cut -d' ' -f1)",
 		  	  "sudo mkfs.ext4 -F /dev/xvdf",
 			  "sudo e2label /dev/xvdf gentoo-rootfs",
 		  	  "sudo mkdir -p /mnt/gentoo",
 		  	  "sudo mount /dev/xvdf /mnt/gentoo",
-		  	  "sudo tar -xJf $(tail -n1 latest-stage3-amd64-systemd.txt | cut -d' ' -f1 | cut -d'/' -f2) --xattrs-include='*.*' --numeric-owner --directory /mnt/gentoo",
+		  	  "sudo tar -xJf $(gpg -d latest-stage3-amd64-openrc.txt 2> /dev/null | tail -1 |cut -d' ' -f1 | cut -d'/' -f2) --xattrs-include='*.*' --numeric-owner --directory /mnt/gentoo",
 		  	  "sudo cp --dereference /etc/resolv.conf /mnt/gentoo/etc/",
 		  	  "sudo mount --types proc /proc /mnt/gentoo/proc",
 		  	  "sudo mount --rbind /sys /mnt/gentoo/sys",
@@ -123,24 +118,23 @@
 			  "sudo cp /tmp/02locale /mnt/gentoo/etc/env.d/02locale",
 			  "sudo cp /tmp/locale.conf /mnt/gentoo/etc/locale.conf",
 			  "sudo chroot /mnt/gentoo locale-gen",
-			  "sudo chroot /mnt/gentoo emerge sys-kernel/installkernel-gentoo",
+			  "sudo cp /tmp/package.license /mnt/gentoo/etc/portage/package.license",
+			  "sudo mkdir -p /mnt/gentoo/etc/portage/package.accept_keywords",
+			  "sudo cp /tmp/cloud-init /mnt/gentoo/etc/portage/package.accept_keywords/cloud-init",
+			  "sudo cp /tmp/fstab /mnt/gentoo/etc/fstab",
+			  "sudo chroot /mnt/gentoo emerge sys-kernel/installkernel",
 			  "sudo chroot /mnt/gentoo emerge sys-kernel/gentoo-kernel-bin",
+			  "sudo chroot /mnt/gentoo emerge sys-kernel/linux-firmware",
 			  "sudo chroot /mnt/gentoo emerge @module-rebuild",
 			  "sudo cp /tmp/networkmanager /mnt/gentoo/etc/portage/package.use",
 			  "sudo chroot /mnt/gentoo emerge net-misc/networkmanager",
-			  "sudo chroot /mnt/gentoo systemctl enable NetworkManager",
-			  "sudo cp /tmp/package.license /mnt/gentoo/etc/portage/package.license",
-			  "sudo chroot /mnt/gentoo emerge sys-kernel/linux-firmware",
-			  "sudo cp /tmp/fstab /mnt/gentoo/etc/fstab",
-			  "sudo mkdir -p /mnt/gentoo/etc/portage/package.accept_keywords",
-			  "sudo cp /tmp/cloud-init /mnt/gentoo/etc/portage/package.accept_keywords/cloud-init",
-		  	  "sudo chroot /mnt/gentoo emerge cloud-init",
-			  "sudo cp /tmp/99_metadata.cfg /mnt/gentoo/etc/cloud/cloud.cfg.d",
+			  "sudo chroot /mnt/gentoo rc-update add NetworkManager default",
+		  	  "sudo chroot /mnt/gentoo emerge app-emulation/cloud-init",
 			  "sudo cp /tmp/20_user.cfg /mnt/gentoo/etc/cloud/cloud.cfg.d",
-		  	  "sudo chroot /mnt/gentoo systemctl enable cloud-init",
-			  "sudo chroot /mnt/gentoo systemctl enable cloud-init-local",
+		  	  "sudo chroot /mnt/gentoo rc-update add cloud-init default",
+			  "sudo chroot /mnt/gentoo rc-update add cloud-init-local default",
 			  "sudo chroot /mnt/gentoo emerge openssh",
-			  "sudo chroot /mnt/gentoo systemctl enable sshd",
+			  "sudo chroot /mnt/gentoo rc-update add sshd default",
 			  "sudo chroot /mnt/gentoo emerge sudo",
 			  "sudo chroot /mnt/gentoo emerge sys-boot/grub:2",
 			  "sudo cp /tmp/grub /mnt/gentoo/etc/default/grub",
